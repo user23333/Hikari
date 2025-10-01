@@ -1,0 +1,35 @@
+name: hikari-build
+
+permissions:
+  contents: write
+  
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: [windows-latest]
+    env:
+      BUILD_TYPE: Release
+    steps:
+    
+    - name: Checkout Repo
+      uses: actions/checkout@v5
+      with:
+          path: hikari
+          submodules: 'recursive'
+          
+    - name: Build hikari
+      run: |
+        cmake -DCMAKE_CXX_FLAGS="/utf-8" -DCMAKE_INSTALL_PREFIX="install" -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DLLVM_ENABLE_PROJECTS="clang;lld;lldb" hikari\\llvm
+        cmake --build build --config ${{ env.BUILD_TYPE }}
+        cmake --build build --config ${{ env.BUILD_TYPE }} --target install
+
+    - name: Package hikari
+      run: |
+        7z a -v1500m hikari.zip install
+        
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: hikari
+        path: hikari.zip.00*

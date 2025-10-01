@@ -11,18 +11,22 @@ jobs:
     env:
       BUILD_TYPE: Release
     steps:
-    
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+        version: 1.13.1
+
     - name: Checkout Repo
       uses: actions/checkout@v5
       with:
-          path: hikari
+          path: hikari-repo
           submodules: 'recursive'
           
     - name: Build hikari
       run: |
-        cmake -DCMAKE_CXX_FLAGS="/utf-8" -DCMAKE_INSTALL_PREFIX="install" -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DLLVM_ENABLE_PROJECTS="clang;lld;lldb" hikari\\llvm
-        cmake --build build --config ${{ env.BUILD_TYPE }}
-        cmake --build build --config ${{ env.BUILD_TYPE }} --target install
+        cmake -DCMAKE_CXX_FLAGS="/utf-8" -DCMAKE_INSTALL_PREFIX=install -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;lld;lldb" -G "Ninja" hikari-repo/llvm
+        ninja
+        ninja install
 
     - name: Package hikari
       run: |

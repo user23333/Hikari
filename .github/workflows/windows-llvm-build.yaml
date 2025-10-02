@@ -3,7 +3,13 @@ name: windows-llvm-build
 permissions:
   contents: write
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "要克隆的分支名称"
+        required: true
+        default: "main"
 
 jobs:
   build:
@@ -16,7 +22,9 @@ jobs:
         run: echo "CORES=$env:NUMBER_OF_PROCESSORS" >> $env:GITHUB_ENV
 
       - name: Checkout Repo
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Install sccache
         run: choco install sccache -y
